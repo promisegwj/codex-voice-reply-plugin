@@ -1,0 +1,18 @@
+{
+  "name": "codex-voice-reply-plugin",
+  "version": "0.1.0",
+  "description": "Speak concise Mandarin voice summaries before Codex sends written replies.",
+  "author": {
+    "name": "promisegwj"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex Voice Reply",
+    "shortDescription": "Speak Mandarin result summaries before Codex replies.",
+    "longDescription": "Codex Voice Reply adds a voice-reply skill and local PowerShell helpers for speaking concise Mandarin result summaries before the final written response. The default neural voice is zh-CN-XiaoxiaoNeural at rate +7% and pitch -1Hz.",
+    "developerName": "promisegwj",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Before your final written response, use the voice-reply skill to speak a concise Mandarin result summary."
+  }
+}

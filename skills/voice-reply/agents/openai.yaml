@@ -1,0 +1,4 @@
+interface:
+  display_name: "Voice Reply"
+  short_description: "Speak concise Mandarin voice summaries before Codex replies."
+  default_prompt: "Use the voice reply skill to speak a concise Mandarin summary before your final written response."

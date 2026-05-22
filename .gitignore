@@ -1,0 +1,9 @@
+.venv/
+out/
+__pycache__/
+.pytest_cache/
+.DS_Store
+Thumbs.db
+*.wav
+*.log
+*.tmp
