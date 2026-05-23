@@ -1,0 +1,209 @@
+{
+  "version": 1,
+  "defaultMode": "reserved_partner",
+  "defaultVoice": {
+    "profileName": "02-anime-soft-loli-character",
+    "voice": "zh-CN-XiaoyiNeural",
+    "rate": "+5%",
+    "pitch": "+5Hz",
+    "style": "萌系少女/萝莉感角色音",
+    "safetyNote": "只作为可爱、童话、游戏角色感的非成人化声音方向使用。"
+  },
+  "voiceProfiles": {
+    "02-anime-soft-loli-character": {
+      "scriptProfile": "soft_loli_character",
+      "voice": "zh-CN-XiaoyiNeural",
+      "rate": "+5%",
+      "pitch": "+5Hz",
+      "style": "轻、软、可爱、童话感，避免成人化表达"
+    },
+    "A3-v3": {
+      "scriptProfile": null,
+      "voice": "zh-CN-XiaoxiaoNeural",
+      "rate": "+7%",
+      "pitch": "-1Hz",
+      "style": "旧主声音基准，温柔陪伴型女声"
+    },
+    "project-coding-professional": {
+      "scriptProfile": "professional",
+      "voice": "zh-CN-YunyangNeural",
+      "rate": "-2%",
+      "pitch": "-1Hz",
+      "style": "稳重男声，适合代码、测试和工程执行"
+    },
+    "project-product-warm": {
+      "scriptProfile": "warm",
+      "voice": "zh-CN-XiaoxiaoNeural",
+      "rate": "+0%",
+      "pitch": "+0Hz",
+      "style": "温和女声，适合产品设计和需求讨论"
+    },
+    "project-learning-narrator": {
+      "scriptProfile": "narrator",
+      "voice": "zh-CN-YunxiNeural",
+      "rate": "-6%",
+      "pitch": "-2Hz",
+      "style": "松弛青年男声，适合教学讲解和长解释"
+    },
+    "project-voice-lab-cute": {
+      "scriptProfile": "soft_loli_character",
+      "voice": "zh-CN-XiaoyiNeural",
+      "rate": "+5%",
+      "pitch": "+5Hz",
+      "style": "默认声音实验室角色音，适合样本比较和试听"
+    }
+  },
+  "mandatorySpeechTriggers": [
+    "request_permission_or_authorization",
+    "request_confirmation_or_approval",
+    "plan_mode_current_choice",
+    "unresolved_key_tradeoff",
+    "blocked_need_user_help",
+    "final_written_reply"
+  ],
+  "timingRules": {
+    "speakOnlyWhenCurrentTurnNeedsSpeech": true,
+    "doNotBatchFutureQuestions": true,
+    "planModeOneQuestionPerTurn": true,
+    "acknowledgeAnswerBeforeNextQuestion": true,
+    "preferSplitQuestionsEvenIfToolSupportsBatching": true,
+    "voiceDisabledModeSuppressesAllSpeech": true
+  },
+  "longTaskPolicy": {
+    "strategy": "stage_and_time",
+    "progressWindowSeconds": {
+      "minimum": 30,
+      "maximum": 60
+    },
+    "stageTriggers": [
+      "task_start",
+      "important_context_found",
+      "before_file_edits",
+      "validation_started",
+      "validation_finished",
+      "blocked",
+      "complete"
+    ],
+    "progressUpdateShape": "一句话说明正在做什么、目前发现什么、下一步是什么。"
+  },
+  "playbackConcurrency": {
+    "enabled": true,
+    "lockName": "codex-voice-playback.lock",
+    "lockScope": "machine_temp_directory",
+    "timeoutSeconds": 300,
+    "behaviorOnTimeout": "skip_playback_but_keep_generated_audio",
+    "uniqueOutputNames": true,
+    "notes": "多个对话同时播报时，语音脚本通过临时目录文件锁串行播放，避免音频重叠；默认输出文件名带时间戳和进程号，避免覆盖。"
+  },
+  "projectVoiceIdentity": {
+    "enabled": true,
+    "purpose": "不同项目可以采用不同默认声音，用户听到声音就能判断当前回复属于哪个项目。",
+    "resolutionOrder": [
+      "current_conversation_user_override",
+      "project_root_voiceOverride",
+      "strategy_voiceProfile",
+      "global_defaultVoice"
+    ],
+    "recommendedProfilesByScenario": {
+      "voice_lab": "project-voice-lab-cute",
+      "coding_focus": "project-coding-professional",
+      "product_design": "project-product-warm",
+      "learning_mode": "project-learning-narrator"
+    }
+  },
+  "platformSupport": {
+    "windows": {
+      "preferredScript": "say-neural.ps1",
+      "fallbackScript": "say.ps1",
+      "playerPriority": [
+        "PresentationCore MediaPlayer",
+        "afplay",
+        "ffplay",
+        "mpg123",
+        "mpv",
+        "Start-Process"
+      ]
+    },
+    "macos": {
+      "preferredScript": "say-neural-mac.sh",
+      "powershellAlternative": "say-neural.ps1 under pwsh",
+      "playerPriority": [
+        "afplay",
+        "ffplay",
+        "mpg123",
+        "mpv",
+        "open"
+      ],
+      "fallbackNote": "macOS 不使用 Windows SAPI 的 say.ps1；离线兜底可以改用系统 say，但声音和参数不等价。"
+    }
+  },
+  "modes": {
+    "chatty_companion": {
+      "displayName": "话牢模式",
+      "tone": "热情、陪伴感强、过程感明显",
+      "frequency": "high",
+      "optionalSpeech": [
+        "task_start",
+        "every_major_discovery",
+        "before_each_work_phase",
+        "after_validation",
+        "final_summary"
+      ],
+      "notes": "适合希望强交互、希望助手边做边说的场景。"
+    },
+    "steady_secretary": {
+      "displayName": "稳重秘书模式",
+      "tone": "稳重、清晰、职业化",
+      "frequency": "medium",
+      "optionalSpeech": [
+        "task_start",
+        "key_discovery",
+        "before_file_edits",
+        "validation_result",
+        "final_summary"
+      ],
+      "notes": "适合默认办公协作，既有存在感又不频繁打断。"
+    },
+    "reserved_partner": {
+      "displayName": "收敛爱人模式",
+      "tone": "克制、柔和、信息密度高",
+      "frequency": "low",
+      "optionalSpeech": [
+        "meaningful_stage_change",
+        "long_silence_progress",
+        "final_summary"
+      ],
+      "notes": "默认模式。适合安静陪伴，只在必要节点出声。"
+    },
+    "silent_executor": {
+      "displayName": "静默执行模式",
+      "tone": "简短、直接、少打扰",
+      "frequency": "minimal",
+      "optionalSpeech": [
+        "final_summary"
+      ],
+      "notes": "适合批量任务、测试和修 bug；强制播报场景仍必须播报。"
+    },
+    "teaching_narrator": {
+      "displayName": "教学讲解模式",
+      "tone": "耐心、解释型、讲清取舍",
+      "frequency": "medium_high",
+      "optionalSpeech": [
+        "task_start",
+        "conceptual_explanation",
+        "key_tradeoff",
+        "validation_result",
+        "final_summary"
+      ],
+      "notes": "适合复杂技术、配置、产品设计讨论和需要边做边理解的场景。"
+    },
+    "voice_disabled": {
+      "displayName": "禁用语音模式",
+      "tone": "完全静默",
+      "frequency": "off",
+      "optionalSpeech": [],
+      "suppressMandatorySpeech": true,
+      "notes": "项目或用户明确要求不发声时使用；不调用语音脚本，包括授权确认、Plan 选择和最终回复。"
+    }
+  }
+}

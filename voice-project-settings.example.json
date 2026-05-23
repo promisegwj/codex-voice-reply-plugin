@@ -1,0 +1,7 @@
+{
+  "strategy": "reserved_partner_default",
+  "modeOverride": null,
+  "voiceOverride": null,
+  "voiceIdentityLabel": null,
+  "notes": "将本文件内容作为项目根目录 voice-project-settings.json 或 .codex-voice.json 的参考；当前对话中用户明确指定的模式和声音仍然优先。可把 voiceOverride 设为 project-coding-professional、project-product-warm、project-learning-narrator 或 project-voice-lab-cute，用声音区分项目。"
+}

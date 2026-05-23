@@ -7,3 +7,5 @@ Thumbs.db
 *.wav
 *.log
 *.tmp
+.env
+.env.*

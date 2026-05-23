@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "defaultOutputRoot": "samples",
+  "generationPolicy": {
+    "generateAudioOnlyAfterUserConfirmation": true,
+    "defaultScript": "say-neural.ps1",
+    "defaultVoiceProfile": "02-anime-soft-loli-character",
+    "avoidImageGenerationForVoiceDescriptors": true,
+    "safetyNotes": [
+      "二次元、萝莉、御姐、青音等词默认作为声音角色方向处理。",
+      "萝莉/幼态角色音只用于可爱、童话、游戏角色感，不做成人化、暧昧化或性化表达。"
+    ]
+  },
+  "sampleFamilies": {
+    "anime": {
+      "displayName": "二次元角色",
+      "description": "适合角色台词、轻小说旁白、游戏引导、虚拟主播口播。",
+      "samples": [
+        {
+          "id": "anime_genki_heroine",
+          "displayName": "元气二次元少女",
+          "recommendedVoice": "zh-CN-XiaoyiNeural",
+          "profile": "lively",
+          "rate": "+8%",
+          "pitch": "+3Hz",
+          "style": "明亮、弹跳感、笑意明显、节奏偏快",
+          "useCases": [
+            "游戏新手引导",
+            "虚拟主播开场",
+            "轻松活动提示"
+          ],
+          "sampleCopyDirection": "短句多一点，带一点元气和期待感，例如提醒用户准备开始下一段冒险。"
+        },
+        {
+          "id": "anime_soft_loli",
+          "displayName": "萌系少女/萝莉感角色音",
+          "recommendedVoice": "zh-CN-XiaoyiNeural",
+          "profile": "lively",
+          "rate": "+5%",
+          "pitch": "+5Hz",
+          "style": "轻、软、可爱、童话感，避免成人化表达",
+          "useCases": [
+            "童话角色",
+            "可爱游戏 NPC",
+            "轻量提示音"
+          ],
+          "sampleCopyDirection": "用天真、短促、干净的句子表达帮助和提醒，不使用暧昧或挑逗内容。"
+        },
+        {
+          "id": "anime_sweet_idol",
+          "displayName": "甜系偶像少女",
+          "recommendedVoice": "zh-CN-XiaoxiaoNeural",
+          "profile": "warm",
+          "rate": "+6%",
+          "pitch": "+2Hz",
+          "style": "甜、亮、亲近、轻微舞台感",
+          "useCases": [
+            "直播开场",
+            "活动欢迎",
+            "粉丝向口播"
+          ],
+          "sampleCopyDirection": "像在和观众打招呼，语气轻快但不要过度夸张。"
+        },
+        {
+          "id": "anime_cool_senior_sister",
+          "displayName": "清冷御姐",
+          "recommendedVoice": "zh-CN-XiaoxiaoNeural",
+          "profile": "podcast",
+          "rate": "-3%",
+          "pitch": "-3Hz",
+          "style": "冷静、低一点、边界感强、句尾收得稳",
+          "useCases": [
+            "悬疑角色",
+            "高冷导师",
+            "策略游戏旁白"
+          ],
+          "sampleCopyDirection": "句子更短，控制情绪，像在平静地下达判断。"
+        },
+        {
+          "id": "anime_warm_senior_sister",
+          "displayName": "温柔御姐",
+          "recommendedVoice": "zh-CN-XiaoxiaoNeural",
+          "profile": "warm",
+          "rate": "-1%",
+          "pitch": "-2Hz",
+          "style": "成熟、松弛、照顾感强、语速稳定",
+          "useCases": [
+            "陪伴型旁白",
+            "情绪安抚",
+            "课程导语"
+          ],
+          "sampleCopyDirection": "像一个成熟可靠的人在慢慢解释，让听者感到被照顾。"
+        },
+        {
+          "id": "anime_youth_qingyin",
+          "displayName": "青音少年",
+          "recommendedVoice": "zh-CN-YunxiNeural",
+          "profile": "sunshine",
+          "rate": "+5%",
+          "pitch": "+2Hz",
+          "style": "清爽、少年感、轻快、没有厚重压迫感",
+          "useCases": [
+            "青春角色",
+            "校园旁白",
+            "轻快教程"
+          ],
+          "sampleCopyDirection": "语气像清爽少年在说明任务，句子简洁，有一点向前推进的劲。"
+        },
+        {
+          "id": "anime_clean_young_male",
+          "displayName": "清爽青年男声",
+          "recommendedVoice": "zh-CN-YunxiNeural",
+          "profile": "narrator",
+          "rate": "+1%",
+          "pitch": "+0Hz",
+          "style": "年轻、干净、松弛、适合讲解",
+          "useCases": [
+            "产品讲解",
+            "轻知识视频",
+            "温和男声旁白"
+          ],
+          "sampleCopyDirection": "像短视频知识博主在自然讲解，清楚但不端着。"
+        }
+      ]
+    }
+  }
+}

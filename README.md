@@ -1,105 +1,95 @@
-# Codex Voice Reply Plugin
+﻿# Codex Voice Interaction Kit
 
-A small Codex plugin and skill for speaking concise Mandarin voice summaries before the final written reply.
+这是一个给 Codex 对话增加中文语音播报、项目级朗读策略、角色声音样本和跨平台 TTS 脚本的小工具包。
 
-The default voice baseline is **A3-v3**:
+## 先看哪份文档
 
-- Voice: `zh-CN-XiaoxiaoNeural`
-- Rate: `+7%`
-- Pitch: `-1Hz`
-- Summary style: conclusion first, then 2-4 key points, then a short next step
+- `README.md`：首次安装、复制给 Codex 的部署提示词、快速接入和最常见配置。
+- [Advanced Voice Configuration](docs/advanced-voice-configuration.md)：高级语音规则参考，包含交互模式、项目策略、禁音机制、并发播放、macOS 细节和声音样本目录。
 
-## What it includes
+第一次使用只需要看本文件；需要深度定制时再看高级配置文档。
 
-- `.codex-plugin/plugin.json` for Codex plugin metadata
-- `skills/voice-reply/SKILL.md` for the Codex voice-reply workflow
-- `scripts/say-neural.ps1` for neural TTS through `edge-tts`
-- `scripts/say.ps1` as a Windows SAPI fallback
-- `scripts/bootstrap.ps1` to create `.venv` and install `edge-tts`
-- `samples/` with selected MP3 examples
+## 给 Codex 复制这一句话
 
-## Install
+直接复制下面这句话发给对方的 Codex：
 
-Clone the repository:
+```text
+请帮我在本机部署并启用这个 Codex 语音交互项目：https://github.com/promisegwj/codex-voice-reply-plugin。请先判断我的系统是 Windows 还是 macOS，再引导我完成 git clone、Python 虚拟环境、edge-tts 依赖安装、语音脚本验证，以及如何把 AGENTS.md / voice-project-settings.json 接入到我的目标项目；安装完成后，请用项目 README 里的默认声音做一次简短测试。
+```
+
+如果只给 Codex 一个 GitHub 地址，也可以这样说：
+
+```text
+请打开这个 GitHub 项目并按 README 指导我完成本地部署：https://github.com/promisegwj/codex-voice-reply-plugin。目标是让 Codex 在支持的项目里自动用中文语音播报，并能按不同项目采用不同朗读策略和默认声音。
+```
+
+## 快速安装
+
+Windows PowerShell:
 
 ```powershell
 git clone https://github.com/promisegwj/codex-voice-reply-plugin.git
 cd codex-voice-reply-plugin
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -U pip
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\say-neural.ps1" -Profile soft_loli_character -Text "语音安装测试完成。"
 ```
 
-Install the local TTS dependency:
+macOS:
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\bootstrap.ps1"
+```bash
+git clone https://github.com/promisegwj/codex-voice-reply-plugin.git
+cd codex-voice-reply-plugin
+python3 -m venv .venv
+./.venv/bin/python -m pip install -U pip
+./.venv/bin/python -m pip install -r requirements.txt
+bash "./scripts/say-neural-mac.sh" --profile soft_loli_character --text "语音安装测试完成。"
 ```
 
-Test the neural voice:
+## 接入到目标项目
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\say-neural.ps1" -Text "这是一次语音回复测试。"
+1. 把本项目的语音规则复制或引用到目标项目的 `AGENTS.md`。
+2. 在目标项目根目录放一个 `voice-project-settings.json` 或 `.codex-voice.json`。
+3. 选择项目策略和声音，例如：
+
+```json
+{
+  "strategy": "coding_focus",
+  "modeOverride": null,
+  "voiceOverride": "project-coding-professional",
+  "voiceIdentityLabel": "代码项目稳重男声"
+}
 ```
 
-List available Mandarin neural voices:
+如果某个项目完全不要发声：
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\say-neural.ps1" -ListVoices
+```json
+{
+  "strategy": "voice_disabled",
+  "modeOverride": "voice_disabled",
+  "voiceOverride": null,
+  "suppressAllSpeech": true
+}
 ```
 
-Test the Windows fallback:
+语音脚本会读取当前目录向上的 `voice-project-settings.json` / `.codex-voice.json`；如果检测到 `suppressAllSpeech: true` 或 `voice_disabled`，会直接静默退出。
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\say.ps1" -Text "这是本机语音兜底测试。"
-```
+## 不同项目用不同声音
 
-## Use in Codex conversations
+项目级声音配置在 `project-voice-strategies.json` 和 `voice-interaction-modes.json` 里。默认提供这些声音身份：
 
-Install or enable the plugin in Codex, then use the `voice-reply` skill when you want spoken replies.
+- `project-voice-lab-cute`：声音实验室角色音。
+- `project-coding-professional`：代码项目稳重男声。
+- `project-product-warm`：产品项目温和女声。
+- `project-learning-narrator`：学习项目松弛男声。
+- `02-anime-soft-loli-character`：全局默认可爱角色音。
 
-For all Codex conversations on the same machine, add a rule like this to your global `AGENTS.md`:
+这样多项目并行时，用户可以通过声音大致判断当前回复来自哪个项目。
 
-````markdown
-在准备正式文字回复前，先调用语音脚本播报一个中文口语化结果摘要，再发送文字版回复。语音摘要采用“总分总”：先讲结论，再按 2 到 4 点讲完成项、依据、不确定点或下一步，最后一句话收束。
+更多规则、模式和样本说明见 [Advanced Voice Configuration](docs/advanced-voice-configuration.md)。
 
-优先使用神经网络语音脚本：
+## 社区文档
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File "C:\path\to\codex-voice-reply-plugin\scripts\say-neural.ps1" -Voice "zh-CN-XiaoxiaoNeural" -Rate "+7%" -Pitch "-1Hz" -Text "这里放要播报的口语化摘要。"
-```
-
-如果神经网络语音失败，再使用 Windows 本机语音：
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File "C:\path\to\codex-voice-reply-plugin\scripts\say.ps1" -Voice Huihui -Text "这里放要播报的口语化摘要。"
-```
-````
-
-Replace `C:\path\to\codex-voice-reply-plugin` with the absolute path where you cloned this repository.
-
-## Voice profiles
-
-`say-neural.ps1` includes these profiles:
-
-| Profile | Voice | Rate | Pitch | Use case |
-| --- | --- | --- | --- | --- |
-| `voice-reply` | `zh-CN-XiaoxiaoNeural` | `+7%` | `-1Hz` | Default Codex reply voice |
-| `warm` | `zh-CN-XiaoxiaoNeural` | `+0%` | `+0Hz` | Warm female voice |
-| `lively` | `zh-CN-XiaoyiNeural` | `+6%` | `+2Hz` | Lively female voice |
-| `sunshine` | `zh-CN-YunxiNeural` | `+3%` | `+0Hz` | Relaxed male explainer |
-| `professional` | `zh-CN-YunyangNeural` | `-2%` | `-1Hz` | Professional news voice |
-| `podcast` | `zh-CN-XiaoxiaoNeural` | `-5%` | `-2Hz` | Slower podcast narration |
-
-Override any profile value directly:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\say-neural.ps1" -Voice "zh-CN-XiaoxiaoNeural" -Rate "+7%" -Pitch "-1Hz" -Text "这是一段自定义参数语音。"
-```
-
-## Notes
-
-- `say-neural.ps1` requires network access because `edge-tts` calls Microsoft Edge online voices.
-- `say.ps1` uses installed Windows SAPI voices and can work without the neural dependency.
-- Generated audio is written to `out/`, which is ignored by git.
-
-## License
-
-MIT
+- [CONTRIBUTING.md](CONTRIBUTING.md)：本地开发、验证和发布前检查。
+- [SECURITY.md](SECURITY.md)：安全问题报告和隐私注意事项。
