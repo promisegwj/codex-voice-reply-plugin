@@ -2,6 +2,13 @@
 
 这是一个给 Codex 对话增加中文语音播报、项目级朗读策略、角色声音样本和跨平台 TTS 脚本的小工具包。
 
+## 先看哪份文档
+
+- `README.md`：首次安装、复制给 Codex 的部署提示词、快速接入和最常见配置。
+- `README-voice.md`：高级语音规则参考，包含交互模式、项目策略、禁音机制、并发播放、macOS 细节和声音样本目录。
+
+第一次使用只需要看本文件；需要深度定制时再看 `README-voice.md`。
+
 ## 给 Codex 复制这一句话
 
 直接复制下面这句话发给对方的 Codex：
@@ -80,5 +87,4 @@ bash "./scripts/say-neural-mac.sh" --profile soft_loli_character --text "语音�
 
 这样多项目并行时，用户可以通过声音大致判断当前回复来自哪个项目。
 
-更多规则、模式和样本说明见 `README-voice.md`。
-
+更多规则、模式和样本说明见高级配置参考：`README-voice.md`。

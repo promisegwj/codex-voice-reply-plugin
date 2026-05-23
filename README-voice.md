@@ -1,6 +1,10 @@
-# Codex voice helpers
+# Advanced Voice Configuration
 
-There are two voice helpers in this folder.
+This is the detailed reference for voice behavior after the plugin is installed. For first-time setup, installation commands, and the copy-paste Codex prompt, start with `README.md`.
+
+Use this file when you want to tune interaction modes, project-level strategies, no-voice behavior, concurrent playback, macOS support, or voice sample profiles.
+
+There are two main voice helpers in this repository:
 
 ## Interaction modes
 
