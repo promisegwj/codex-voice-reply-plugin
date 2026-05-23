@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "defaultStrategy": "reserved_partner_default",
+  "projectSettingsFiles": [
+    "voice-project-settings.json",
+    ".codex-voice.json"
+  ],
+  "resolutionOrder": [
+    "current_conversation_user_override",
+    "project_root_settings_file",
+    "central_project_match",
+    "global_default"
+  ],
+  "strategies": {
+    "reserved_partner_default": {
+      "displayName": "默认收敛陪伴",
+      "mode": "reserved_partner",
+      "voiceProfile": "02-anime-soft-loli-character",
+      "voiceIdentityLabel": "默认可爱角色音",
+      "description": "默认克制，只在必要节点、阻塞和完成时播报。"
+    },
+    "voice_lab": {
+      "displayName": "声音样本实验室",
+      "mode": "teaching_narrator",
+      "voiceProfile": "project-voice-lab-cute",
+      "voiceIdentityLabel": "声音实验室角色音",
+      "description": "适合生成、试听、比较声音样本；允许更多解释声音取舍和参数。"
+    },
+    "coding_focus": {
+      "displayName": "代码专注执行",
+      "mode": "silent_executor",
+      "voiceProfile": "project-coding-professional",
+      "voiceIdentityLabel": "代码项目稳重男声",
+      "description": "适合修 bug、跑测试、批量改代码；只保留强制播报和最终总结，声音更稳重，方便和其他项目区分。"
+    },
+    "product_design": {
+      "displayName": "产品设计讨论",
+      "mode": "steady_secretary",
+      "voiceProfile": "project-product-warm",
+      "voiceIdentityLabel": "产品项目温和女声",
+      "description": "适合需求、体验和方案讨论；关键阶段播报，避免过度打扰，声音温和易辨认。"
+    },
+    "learning_mode": {
+      "displayName": "教学讲解",
+      "mode": "teaching_narrator",
+      "voiceProfile": "project-learning-narrator",
+      "voiceIdentityLabel": "学习项目松弛男声",
+      "description": "适合学习、调试讲解和复杂配置；会解释关键原因和取舍，声音更像讲解旁白。"
+    },
+    "voice_disabled": {
+      "displayName": "项目禁用语音",
+      "mode": "voice_disabled",
+      "voiceProfile": null,
+      "voiceEnabled": false,
+      "suppressAllSpeech": true,
+      "description": "项目级关闭语音；不调用 say-neural.ps1 或 say.ps1，包括强制播报和最终总结。"
+    }
+  },
+  "projectMatches": [
+    {
+      "pathContains": "codex-voice-reply-plugin",
+      "strategy": "voice_lab"
+    }
+  ],
+  "exampleProjectSettings": {
+    "strategy": "coding_focus",
+    "modeOverride": null,
+    "voiceOverride": "project-coding-professional",
+    "notes": "放在项目根目录的 voice-project-settings.json 或 .codex-voice.json 可以覆盖该项目朗读策略；voiceOverride 可让不同项目使用不同默认声音。"
+  }
+}

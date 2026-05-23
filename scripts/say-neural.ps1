@@ -2,8 +2,8 @@ param(
     [Parameter(Position = 0, ValueFromPipeline = $true)]
     [string[]] $Text,
 
-    [ValidateSet("voice-reply", "warm", "lively", "sunshine", "professional", "passion", "bright", "podcast", "detective", "narrator")]
-    [string] $Profile = "voice-reply",
+    [ValidateSet("soft_loli_character", "02-anime-soft-loli-character", "project-voice-lab-cute", "project-coding-professional", "project-product-warm", "project-learning-narrator", "warm", "lively", "sunshine", "professional", "passion", "bright", "podcast", "detective", "narrator")]
+    [string] $Profile = "soft_loli_character",
 
     [string] $Voice,
 
@@ -17,14 +17,150 @@ param(
 
     [switch] $NoPlay,
 
-    [switch] $ListVoices
+    [switch] $ListVoices,
+
+    [int] $PlaybackLockTimeoutSeconds = 300,
+
+    [string] $ProjectRoot,
+
+    [switch] $IgnoreProjectVoiceSettings
 )
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
-$edgeTts = Join-Path $repoRoot ".venv\Scripts\edge-tts.exe"
+function Get-VoiceProjectSettings {
+    param([string] $StartPath)
 
-if (-not (Test-Path -LiteralPath $edgeTts)) {
-    Write-Error "edge-tts is not installed at '$edgeTts'. Run scripts\bootstrap.ps1 first."
+    if ([string]::IsNullOrWhiteSpace($StartPath)) {
+        $StartPath = (Get-Location).ProviderPath
+    }
+
+    try {
+        $currentItem = Get-Item -LiteralPath $StartPath -ErrorAction Stop
+    }
+    catch {
+        return $null
+    }
+
+    $directory = if ($currentItem.PSIsContainer) {
+        $currentItem.FullName
+    }
+    else {
+        Split-Path -Parent $currentItem.FullName
+    }
+
+    while (-not [string]::IsNullOrWhiteSpace($directory)) {
+        foreach ($fileName in @("voice-project-settings.json", ".codex-voice.json")) {
+            $settingsPath = Join-Path $directory $fileName
+            if (Test-Path -LiteralPath $settingsPath) {
+                try {
+                    $settings = Get-Content -Raw -Encoding UTF8 -LiteralPath $settingsPath | ConvertFrom-Json
+                    return $settings
+                }
+                catch {
+                    Write-Warning "Could not parse voice settings at '$settingsPath'; continuing without suppression."
+                }
+            }
+        }
+
+        $parent = Split-Path -Parent $directory
+        if ($parent -eq $directory) {
+            break
+        }
+
+        $directory = $parent
+    }
+
+    return $null
+}
+
+function Test-VoiceSuppressedBySettings {
+    param($Settings)
+
+    return (
+        $null -ne $Settings -and (
+            $Settings.suppressAllSpeech -eq $true -or
+            $Settings.strategy -eq "voice_disabled" -or
+            $Settings.modeOverride -eq "voice_disabled"
+        )
+    )
+}
+
+function Resolve-StrategyVoiceProfile {
+    param([string] $StrategyName)
+
+    if ([string]::IsNullOrWhiteSpace($StrategyName)) {
+        return $null
+    }
+
+    $strategyRoot = if ((Split-Path -Leaf $PSScriptRoot) -eq "scripts") {
+        Split-Path -Parent $PSScriptRoot
+    }
+    else {
+        $PSScriptRoot
+    }
+    $strategyPath = Join-Path $strategyRoot "project-voice-strategies.json"
+    if (Test-Path -LiteralPath $strategyPath) {
+        try {
+            $strategyConfig = Get-Content -Raw -Encoding UTF8 -LiteralPath $strategyPath | ConvertFrom-Json
+            $strategy = $strategyConfig.strategies.$StrategyName
+            if ($null -ne $strategy -and -not [string]::IsNullOrWhiteSpace($strategy.voiceProfile)) {
+                return [string] $strategy.voiceProfile
+            }
+        }
+        catch {
+            Write-Warning "Could not parse project voice strategies at '$strategyPath'."
+        }
+    }
+
+    $fallbackProfiles = @{
+        voice_lab = "project-voice-lab-cute"
+        coding_focus = "project-coding-professional"
+        product_design = "project-product-warm"
+        learning_mode = "project-learning-narrator"
+        reserved_partner_default = "02-anime-soft-loli-character"
+    }
+
+    if ($fallbackProfiles.ContainsKey($StrategyName)) {
+        return $fallbackProfiles[$StrategyName]
+    }
+
+    return $null
+}
+
+$projectSettings = if ($IgnoreProjectVoiceSettings) { $null } else { Get-VoiceProjectSettings -StartPath $ProjectRoot }
+
+if (-not $IgnoreProjectVoiceSettings -and (Test-VoiceSuppressedBySettings -Settings $projectSettings)) {
+    exit 0
+}
+
+$repoRoot = if ((Split-Path -Leaf $PSScriptRoot) -eq "scripts") {
+    Split-Path -Parent $PSScriptRoot
+}
+else {
+    $PSScriptRoot
+}
+
+$edgeTtsCandidates = @(
+    (Join-Path $repoRoot (Join-Path ".venv" (Join-Path "Scripts" "edge-tts.exe"))),
+    (Join-Path $repoRoot (Join-Path ".venv" (Join-Path "bin" "edge-tts")))
+)
+
+$edgeTts = $null
+foreach ($candidate in $edgeTtsCandidates) {
+    if (Test-Path -LiteralPath $candidate) {
+        $edgeTts = $candidate
+        break
+    }
+}
+
+if ($null -eq $edgeTts) {
+    $edgeTtsCommand = Get-Command "edge-tts" -ErrorAction SilentlyContinue
+    if ($null -ne $edgeTtsCommand) {
+        $edgeTts = $edgeTtsCommand.Source
+    }
+}
+
+if ($null -eq $edgeTts) {
+    Write-Error "edge-tts is not installed in .venv or on PATH."
     exit 1
 }
 
@@ -52,11 +188,135 @@ if ([string]::IsNullOrWhiteSpace($message)) {
     exit 0
 }
 
+function Invoke-WithVoicePlaybackLock {
+    param(
+        [scriptblock] $Action,
+        [int] $TimeoutSeconds = 300
+    )
+
+    $lockPath = Join-Path ([System.IO.Path]::GetTempPath()) "codex-voice-playback.lock"
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    $stream = $null
+
+    while ($null -eq $stream -and (Get-Date) -lt $deadline) {
+        try {
+            $stream = [System.IO.File]::Open(
+                $lockPath,
+                [System.IO.FileMode]::OpenOrCreate,
+                [System.IO.FileAccess]::ReadWrite,
+                [System.IO.FileShare]::None
+            )
+        }
+        catch {
+            Start-Sleep -Milliseconds 200
+        }
+    }
+
+    if ($null -eq $stream) {
+        Write-Warning "Could not acquire Codex voice playback lock within $TimeoutSeconds seconds; skipping playback."
+        return
+    }
+
+    try {
+        & $Action
+    }
+    finally {
+        $stream.Dispose()
+    }
+}
+
+function Invoke-AudioPlayback {
+    param([string] $MediaPath)
+
+    try {
+        Add-Type -AssemblyName PresentationCore -ErrorAction Stop
+        $player = New-Object System.Windows.Media.MediaPlayer
+        $player.Open([Uri] $MediaPath)
+
+        for ($i = 0; $i -lt 20 -and -not $player.NaturalDuration.HasTimeSpan; $i++) {
+            Start-Sleep -Milliseconds 100
+        }
+
+        $player.Play()
+
+        if ($player.NaturalDuration.HasTimeSpan) {
+            $sleepMs = [Math]::Ceiling($player.NaturalDuration.TimeSpan.TotalMilliseconds) + 500
+            Start-Sleep -Milliseconds $sleepMs
+        }
+        else {
+            Start-Sleep -Seconds 8
+        }
+
+        $player.Close()
+        return
+    }
+    catch {
+        # Fall through to command-line players for macOS/Linux or Windows fallback.
+    }
+
+    $afplay = Get-Command "afplay" -ErrorAction SilentlyContinue
+    if ($null -ne $afplay) {
+        & $afplay.Source $MediaPath
+        return
+    }
+
+    $ffplay = Get-Command "ffplay" -ErrorAction SilentlyContinue
+    if ($null -ne $ffplay) {
+        & $ffplay.Source -nodisp -autoexit -loglevel quiet $MediaPath
+        return
+    }
+
+    $mpg123 = Get-Command "mpg123" -ErrorAction SilentlyContinue
+    if ($null -ne $mpg123) {
+        & $mpg123.Source -q $MediaPath
+        return
+    }
+
+    $mpv = Get-Command "mpv" -ErrorAction SilentlyContinue
+    if ($null -ne $mpv) {
+        & $mpv.Source --really-quiet --no-video $MediaPath
+        return
+    }
+
+    try {
+        Start-Process -FilePath $MediaPath | Out-Null
+        Start-Sleep -Seconds 8
+    }
+    catch {
+        Write-Warning "Generated audio but could not play it automatically: $MediaPath"
+    }
+}
+
 $profiles = @{
-    "voice-reply" = @{
-        Voice = "zh-CN-XiaoxiaoNeural"
-        Rate = "+7%"
+    soft_loli_character = @{
+        Voice = "zh-CN-XiaoyiNeural"
+        Rate = "+5%"
+        Pitch = "+5Hz"
+    }
+    "02-anime-soft-loli-character" = @{
+        Voice = "zh-CN-XiaoyiNeural"
+        Rate = "+5%"
+        Pitch = "+5Hz"
+    }
+    "project-voice-lab-cute" = @{
+        Voice = "zh-CN-XiaoyiNeural"
+        Rate = "+5%"
+        Pitch = "+5Hz"
+    }
+    "project-coding-professional" = @{
+        Voice = "zh-CN-YunyangNeural"
+        Rate = "-2%"
         Pitch = "-1Hz"
+    }
+    "project-product-warm" = @{
+        Voice = "zh-CN-XiaoxiaoNeural"
+        Rate = "+0%"
+        Pitch = "+0Hz"
+    }
+    "project-learning-narrator" = @{
+        Voice = "zh-CN-YunxiNeural"
+        Rate = "-6%"
+        Pitch = "-2Hz"
     }
     warm = @{
         Voice = "zh-CN-XiaoxiaoNeural"
@@ -105,14 +365,32 @@ $profiles = @{
     }
 }
 
+$profileWasExplicit = $PSBoundParameters.ContainsKey("Profile")
+if (-not $profileWasExplicit -and $null -ne $projectSettings) {
+    if (-not [string]::IsNullOrWhiteSpace($projectSettings.voiceOverride)) {
+        $Profile = [string] $projectSettings.voiceOverride
+    }
+    else {
+        $resolvedVoiceProfile = Resolve-StrategyVoiceProfile -StrategyName ([string] $projectSettings.strategy)
+        if (-not [string]::IsNullOrWhiteSpace($resolvedVoiceProfile)) {
+            $Profile = $resolvedVoiceProfile
+        }
+    }
+}
+
+if (-not $profiles.ContainsKey($Profile)) {
+    Write-Error "Unknown voice profile '$Profile'."
+    exit 2
+}
+
 $selected = $profiles[$Profile]
 $voiceName = if ([string]::IsNullOrWhiteSpace($Voice)) { $selected.Voice } else { $Voice }
 $rateValue = if ([string]::IsNullOrWhiteSpace($Rate)) { $selected.Rate } else { $Rate }
 $pitchValue = if ([string]::IsNullOrWhiteSpace($Pitch)) { $selected.Pitch } else { $Pitch }
 
 if ([string]::IsNullOrWhiteSpace($OutPath)) {
-    $fileName = "codex-voice-{0:yyyyMMdd-HHmmss}.mp3" -f (Get-Date)
-    $OutPath = Join-Path $repoRoot "out\$fileName"
+    $fileName = "codex-voice-{0:yyyyMMdd-HHmmssfff}-{1}.mp3" -f (Get-Date), $PID
+    $OutPath = Join-Path (Join-Path $repoRoot "out") $fileName
 }
 
 $resolvedOutPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($OutPath)
@@ -138,28 +416,7 @@ if ($LASTEXITCODE -ne 0) {
 Write-Output $resolvedOutPath
 
 if (-not $NoPlay) {
-    try {
-        Add-Type -AssemblyName PresentationCore
-        $player = New-Object System.Windows.Media.MediaPlayer
-        $player.Open([Uri] $resolvedOutPath)
-
-        for ($i = 0; $i -lt 20 -and -not $player.NaturalDuration.HasTimeSpan; $i++) {
-            Start-Sleep -Milliseconds 100
-        }
-
-        $player.Play()
-
-        if ($player.NaturalDuration.HasTimeSpan) {
-            $sleepMs = [Math]::Ceiling($player.NaturalDuration.TimeSpan.TotalMilliseconds) + 500
-            Start-Sleep -Milliseconds $sleepMs
-        }
-        else {
-            Start-Sleep -Seconds 8
-        }
-
-        $player.Close()
-    }
-    catch {
-        Start-Process -FilePath $resolvedOutPath | Out-Null
+    Invoke-WithVoicePlaybackLock -TimeoutSeconds $PlaybackLockTimeoutSeconds -Action {
+        Invoke-AudioPlayback -MediaPath $resolvedOutPath
     }
 }
