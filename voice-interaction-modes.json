@@ -15,42 +15,131 @@
       "voice": "zh-CN-XiaoyiNeural",
       "rate": "+5%",
       "pitch": "+5Hz",
-      "style": "轻、软、可爱、童话感，避免成人化表达"
+      "style": "轻、软、可爱、童话感，避免成人化表达",
+      "sampleFile": "samples/anime-voices-20260523-101938/02-anime-soft-loli-character.mp3",
+      "previewText": "你好呀，我会用轻一点、软一点的声音提醒你当前项目的进展。"
     },
     "A3-v3": {
       "scriptProfile": null,
       "voice": "zh-CN-XiaoxiaoNeural",
       "rate": "+7%",
       "pitch": "-1Hz",
-      "style": "旧主声音基准，温柔陪伴型女声"
+      "style": "旧主声音基准，温柔陪伴型女声",
+      "sampleFile": "samples/A3-v3-main-voice.mp3",
+      "previewText": "这是旧主声音基准，语气温柔，适合正式回复前的简短总结。"
+    },
+    "A1-relaxed-female-explainer": {
+      "scriptProfile": "warm",
+      "voice": "zh-CN-XiaoxiaoNeural",
+      "rate": "-5%",
+      "pitch": "-1Hz",
+      "style": "慢一点、松弛一点的女声讲解",
+      "sampleFile": "samples/A1-relaxed-female-explainer.mp3",
+      "previewText": "我会放慢一点节奏，把复杂配置拆开讲清楚。"
+    },
+    "A3-v2-gentle-companion-lighter": {
+      "scriptProfile": null,
+      "voice": "zh-CN-XiaoxiaoNeural",
+      "rate": "+5%",
+      "pitch": "+0Hz",
+      "style": "A3 调参版本，更轻一点的温柔陪伴女声",
+      "sampleFile": "samples/a3-tuned/A3-v2-gentle-companion-lighter.mp3",
+      "previewText": "这是更轻一点的陪伴型声音，适合不想被打扰但希望有回应的项目。"
+    },
+    "A5-casual-female-voiceover": {
+      "scriptProfile": "warm",
+      "voice": "zh-CN-XiaoxiaoNeural",
+      "rate": "+3%",
+      "pitch": "+1Hz",
+      "style": "自然口播感女声，轻松但不夸张",
+      "sampleFile": "samples/A5-casual-female-voiceover.mp3",
+      "previewText": "我会用更自然的口播方式，快速告诉你项目现在发生了什么。"
+    },
+    "01-anime-genki-heroine": {
+      "scriptProfile": "lively",
+      "voice": "zh-CN-XiaoyiNeural",
+      "rate": "+8%",
+      "pitch": "+3Hz",
+      "style": "元气二次元少女，明亮、弹跳感、节奏偏快",
+      "sampleFile": "samples/anime-voices-20260523-101938/01-anime-genki-heroine.mp3",
+      "previewText": "准备好了吗？我会用更元气的声音提醒你下一步要做什么。"
+    },
+    "03-anime-sweet-idol": {
+      "scriptProfile": "warm",
+      "voice": "zh-CN-XiaoxiaoNeural",
+      "rate": "+6%",
+      "pitch": "+2Hz",
+      "style": "甜系偶像少女，甜、亮、亲近、轻微舞台感",
+      "sampleFile": "samples/anime-voices-20260523-101938/03-anime-sweet-idol.mp3",
+      "previewText": "你好，今天也一起把项目推进得漂亮一点吧。"
+    },
+    "04-anime-cool-senior-sister": {
+      "scriptProfile": "podcast",
+      "voice": "zh-CN-XiaoxiaoNeural",
+      "rate": "-3%",
+      "pitch": "-3Hz",
+      "style": "清冷御姐，冷静、低一点、边界感强",
+      "sampleFile": "samples/anime-voices-20260523-101938/04-anime-cool-senior-sister.mp3",
+      "previewText": "我会保持冷静，只在关键节点给出判断。"
+    },
+    "05-anime-warm-senior-sister": {
+      "scriptProfile": "warm",
+      "voice": "zh-CN-XiaoxiaoNeural",
+      "rate": "-1%",
+      "pitch": "-2Hz",
+      "style": "温柔御姐，成熟、松弛、照顾感强",
+      "sampleFile": "samples/anime-voices-20260523-101938/05-anime-warm-senior-sister.mp3",
+      "previewText": "别急，我会慢慢把当前进展和下一步讲清楚。"
+    },
+    "06-anime-youth-qingyin": {
+      "scriptProfile": "sunshine",
+      "voice": "zh-CN-YunxiNeural",
+      "rate": "+5%",
+      "pitch": "+2Hz",
+      "style": "青音少年，清爽、少年感、轻快",
+      "sampleFile": "samples/anime-voices-20260523-101938/06-anime-youth-qingyin.mp3",
+      "previewText": "我会用清爽一点的声音，帮你快速确认当前任务状态。"
+    },
+    "07-anime-clean-young-male": {
+      "scriptProfile": "narrator",
+      "voice": "zh-CN-YunxiNeural",
+      "rate": "+1%",
+      "pitch": "+0Hz",
+      "style": "清爽青年男声，年轻、干净、适合讲解",
+      "sampleFile": "samples/anime-voices-20260523-101938/07-anime-clean-young-male.mp3",
+      "previewText": "我会用干净自然的男声，把结果和依据简洁说清楚。"
     },
     "project-coding-professional": {
       "scriptProfile": "professional",
       "voice": "zh-CN-YunyangNeural",
       "rate": "-2%",
       "pitch": "-1Hz",
-      "style": "稳重男声，适合代码、测试和工程执行"
+      "style": "稳重男声，适合代码、测试和工程执行",
+      "previewText": "代码任务已完成，我会用稳重一点的方式报告测试和改动结果。"
     },
     "project-product-warm": {
       "scriptProfile": "warm",
       "voice": "zh-CN-XiaoxiaoNeural",
       "rate": "+0%",
       "pitch": "+0Hz",
-      "style": "温和女声，适合产品设计和需求讨论"
+      "style": "温和女声，适合产品设计和需求讨论",
+      "previewText": "我会用温和清楚的声音，帮你整理需求和体验取舍。"
     },
     "project-learning-narrator": {
       "scriptProfile": "narrator",
       "voice": "zh-CN-YunxiNeural",
       "rate": "-6%",
       "pitch": "-2Hz",
-      "style": "松弛青年男声，适合教学讲解和长解释"
+      "style": "松弛青年男声，适合教学讲解和长解释",
+      "previewText": "我会放慢节奏，把概念、步骤和原因讲得更容易跟上。"
     },
     "project-voice-lab-cute": {
       "scriptProfile": "soft_loli_character",
       "voice": "zh-CN-XiaoyiNeural",
       "rate": "+5%",
       "pitch": "+5Hz",
-      "style": "默认声音实验室角色音，适合样本比较和试听"
+      "style": "活泼小话痨角色音，适合更活泼、更有存在感的项目",
+      "previewText": "我会用活泼一点的声音，多跟你说说进展、发现和那些有点意思的小转折。"
     }
   },
   "mandatorySpeechTriggers": [
@@ -105,6 +194,7 @@
       "global_defaultVoice"
     ],
     "recommendedProfilesByScenario": {
+      "chatty_project": "project-voice-lab-cute",
       "voice_lab": "project-voice-lab-cute",
       "coding_focus": "project-coding-professional",
       "product_design": "project-product-warm",
@@ -139,7 +229,7 @@
   },
   "modes": {
     "chatty_companion": {
-      "displayName": "话牢模式",
+      "displayName": "话痨模式",
       "tone": "热情、陪伴感强、过程感明显",
       "frequency": "high",
       "optionalSpeech": [

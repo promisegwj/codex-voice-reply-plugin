@@ -11,6 +11,124 @@
     "central_project_match",
     "global_default"
   ],
+  "defaultProjectTag": "default_reserved",
+  "autoProjectTagAssignment": {
+    "enabled": true,
+    "onlyWhenNoProjectSettings": true,
+    "method": "keyword_then_path_hash",
+    "candidateTags": [
+      "default_reserved",
+      "coding_quiet",
+      "product_warm",
+      "learning_narrator",
+      "voice_lab_cute"
+    ],
+    "keywordRules": [
+      {
+        "projectTag": "voice_lab_cute",
+        "pathContains": [
+          "voice",
+          "tts",
+          "audio",
+          "speech",
+          "chat",
+          "talk",
+          "语音",
+          "声音",
+          "闲聊",
+          "陪伴"
+        ]
+      },
+      {
+        "projectTag": "learning_narrator",
+        "pathContains": [
+          "learn",
+          "learning",
+          "study",
+          "skill",
+          "教程",
+          "课程",
+          "学习"
+        ]
+      },
+      {
+        "projectTag": "product_warm",
+        "pathContains": [
+          "product",
+          "design",
+          "ux",
+          "需求",
+          "产品",
+          "设计"
+        ]
+      },
+      {
+        "projectTag": "coding_quiet",
+        "pathContains": [
+          "code",
+          "api",
+          "sdk",
+          "plugin",
+          "python",
+          "matlab",
+          "repo",
+          "代码"
+        ]
+      }
+    ],
+    "notes": "配置网页会在项目没有本地语音配置时，先按项目名和路径关键词分配项目标签；没有命中关键词时，再按项目路径哈希从 candidateTags 中稳定选择一个标签，让不同项目默认使用不同声音。网页端可选择只补写缺失配置，或覆盖全部项目配置。"
+  },
+  "projectTags": {
+    "default_reserved": {
+      "displayName": "轻声陪伴",
+      "strategy": "reserved_partner_default",
+      "modeOverride": "reserved_partner",
+      "voiceOverride": "02-anime-soft-loli-character",
+      "voiceIdentityLabel": "默认可爱角色音",
+      "description": "低频播报，只在关键节点、阻塞和最终回复时出声。"
+    },
+    "voice_lab_cute": {
+      "displayName": "活泼小话痨",
+      "strategy": "voice_lab",
+      "modeOverride": "chatty_companion",
+      "voiceOverride": "project-voice-lab-cute",
+      "voiceIdentityLabel": "活泼小话痨角色音",
+      "description": "更爱说一点，语气活泼，进展、发现和有意思的小转折都会主动讲。"
+    },
+    "coding_quiet": {
+      "displayName": "安静执行",
+      "strategy": "coding_focus",
+      "modeOverride": "silent_executor",
+      "voiceOverride": "project-coding-professional",
+      "voiceIdentityLabel": "代码项目稳重男声",
+      "description": "修代码、跑测试时尽量少说，只在阻塞和完成时汇报。"
+    },
+    "product_warm": {
+      "displayName": "阶段汇报",
+      "strategy": "product_design",
+      "modeOverride": "steady_secretary",
+      "voiceOverride": "project-product-warm",
+      "voiceIdentityLabel": "产品项目温和女声",
+      "description": "像稳重秘书一样在关键阶段同步进展和取舍。"
+    },
+    "learning_narrator": {
+      "displayName": "教学讲解",
+      "strategy": "learning_mode",
+      "modeOverride": "teaching_narrator",
+      "voiceOverride": "project-learning-narrator",
+      "voiceIdentityLabel": "学习项目松弛男声",
+      "description": "会解释概念、步骤和原因，适合学习或复杂配置。"
+    },
+    "silent_project": {
+      "displayName": "完全静音",
+      "strategy": "voice_disabled",
+      "modeOverride": "voice_disabled",
+      "voiceOverride": null,
+      "voiceIdentityLabel": "禁用语音",
+      "suppressAllSpeech": true,
+      "description": "不调用语音脚本，包括确认、Plan 选择和最终回复。"
+    }
+  },
   "strategies": {
     "reserved_partner_default": {
       "displayName": "默认收敛陪伴",
@@ -20,11 +138,11 @@
       "description": "默认克制，只在必要节点、阻塞和完成时播报。"
     },
     "voice_lab": {
-      "displayName": "声音样本实验室",
-      "mode": "teaching_narrator",
+      "displayName": "活泼小话痨",
+      "mode": "chatty_companion",
       "voiceProfile": "project-voice-lab-cute",
-      "voiceIdentityLabel": "声音实验室角色音",
-      "description": "适合生成、试听、比较声音样本；允许更多解释声音取舍和参数。"
+      "voiceIdentityLabel": "活泼小话痨角色音",
+      "description": "适合希望助手更有存在感、更跳脱一点的项目；会更主动地讲进展、发现和轻量解释。"
     },
     "coding_focus": {
       "displayName": "代码专注执行",
@@ -63,9 +181,12 @@
     }
   ],
   "exampleProjectSettings": {
+    "projectTag": "coding_quiet",
     "strategy": "coding_focus",
-    "modeOverride": null,
+    "modeOverride": "silent_executor",
     "voiceOverride": "project-coding-professional",
-    "notes": "放在项目根目录的 voice-project-settings.json 或 .codex-voice.json 可以覆盖该项目朗读策略；voiceOverride 可让不同项目使用不同默认声音。"
+    "voiceIdentityLabel": "代码项目稳重男声",
+    "suppressAllSpeech": false,
+    "notes": "放在项目根目录的 voice-project-settings.json 或 .codex-voice.json 可以覆盖该项目朗读策略；projectTag 用于让配置网页自动解释项目类型并写入对应 strategy、mode 和默认声音。"
   }
 }

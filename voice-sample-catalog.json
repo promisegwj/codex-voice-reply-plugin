@@ -12,6 +12,56 @@
     ]
   },
   "sampleFamilies": {
+    "baseline_comparisons": {
+      "displayName": "A 系列基准与调参样本",
+      "description": "适合比较主声音、松弛讲解、轻量陪伴和自然口播之间的差异。",
+      "samples": [
+        {
+          "id": "A1-relaxed-female-explainer",
+          "displayName": "A1 松弛女声讲解",
+          "recommendedVoice": "zh-CN-XiaoxiaoNeural",
+          "profile": "A1-relaxed-female-explainer",
+          "rate": "-5%",
+          "pitch": "-1Hz",
+          "style": "慢一点、松弛一点，适合解释复杂配置",
+          "sampleFile": "samples/A1-relaxed-female-explainer.mp3",
+          "sampleCopyDirection": "像在耐心解释一个配置流程，语速放慢，句子清楚。"
+        },
+        {
+          "id": "A3-v2-gentle-companion-lighter",
+          "displayName": "A3-v2 更轻陪伴女声",
+          "recommendedVoice": "zh-CN-XiaoxiaoNeural",
+          "profile": "A3-v2-gentle-companion-lighter",
+          "rate": "+5%",
+          "pitch": "+0Hz",
+          "style": "更轻一点的温柔陪伴感",
+          "sampleFile": "samples/a3-tuned/A3-v2-gentle-companion-lighter.mp3",
+          "sampleCopyDirection": "像轻声提示当前进展，不强行占用注意力。"
+        },
+        {
+          "id": "A3-v3",
+          "displayName": "A3-v3 旧主声音基准",
+          "recommendedVoice": "zh-CN-XiaoxiaoNeural",
+          "profile": "A3-v3",
+          "rate": "+7%",
+          "pitch": "-1Hz",
+          "style": "温柔陪伴型女声，旧主声音基准",
+          "sampleFile": "samples/A3-v3-main-voice.mp3",
+          "sampleCopyDirection": "正式回复前的总分总摘要，语气温柔但信息密度高。"
+        },
+        {
+          "id": "A5-casual-female-voiceover",
+          "displayName": "A5 自然口播女声",
+          "recommendedVoice": "zh-CN-XiaoxiaoNeural",
+          "profile": "A5-casual-female-voiceover",
+          "rate": "+3%",
+          "pitch": "+1Hz",
+          "style": "自然口播感，轻松但不夸张",
+          "sampleFile": "samples/A5-casual-female-voiceover.mp3",
+          "sampleCopyDirection": "像短视频或产品口播，直接说重点。"
+        }
+      ]
+    },
     "anime": {
       "displayName": "二次元角色",
       "description": "适合角色台词、轻小说旁白、游戏引导、虚拟主播口播。",
@@ -20,10 +70,11 @@
           "id": "anime_genki_heroine",
           "displayName": "元气二次元少女",
           "recommendedVoice": "zh-CN-XiaoyiNeural",
-          "profile": "lively",
+          "profile": "01-anime-genki-heroine",
           "rate": "+8%",
           "pitch": "+3Hz",
           "style": "明亮、弹跳感、笑意明显、节奏偏快",
+          "sampleFile": "samples/anime-voices-20260523-101938/01-anime-genki-heroine.mp3",
           "useCases": [
             "游戏新手引导",
             "虚拟主播开场",
@@ -35,10 +86,11 @@
           "id": "anime_soft_loli",
           "displayName": "萌系少女/萝莉感角色音",
           "recommendedVoice": "zh-CN-XiaoyiNeural",
-          "profile": "lively",
+          "profile": "02-anime-soft-loli-character",
           "rate": "+5%",
           "pitch": "+5Hz",
           "style": "轻、软、可爱、童话感，避免成人化表达",
+          "sampleFile": "samples/anime-voices-20260523-101938/02-anime-soft-loli-character.mp3",
           "useCases": [
             "童话角色",
             "可爱游戏 NPC",
@@ -50,10 +102,11 @@
           "id": "anime_sweet_idol",
           "displayName": "甜系偶像少女",
           "recommendedVoice": "zh-CN-XiaoxiaoNeural",
-          "profile": "warm",
+          "profile": "03-anime-sweet-idol",
           "rate": "+6%",
           "pitch": "+2Hz",
           "style": "甜、亮、亲近、轻微舞台感",
+          "sampleFile": "samples/anime-voices-20260523-101938/03-anime-sweet-idol.mp3",
           "useCases": [
             "直播开场",
             "活动欢迎",
@@ -65,10 +118,11 @@
           "id": "anime_cool_senior_sister",
           "displayName": "清冷御姐",
           "recommendedVoice": "zh-CN-XiaoxiaoNeural",
-          "profile": "podcast",
+          "profile": "04-anime-cool-senior-sister",
           "rate": "-3%",
           "pitch": "-3Hz",
           "style": "冷静、低一点、边界感强、句尾收得稳",
+          "sampleFile": "samples/anime-voices-20260523-101938/04-anime-cool-senior-sister.mp3",
           "useCases": [
             "悬疑角色",
             "高冷导师",
@@ -80,10 +134,11 @@
           "id": "anime_warm_senior_sister",
           "displayName": "温柔御姐",
           "recommendedVoice": "zh-CN-XiaoxiaoNeural",
-          "profile": "warm",
+          "profile": "05-anime-warm-senior-sister",
           "rate": "-1%",
           "pitch": "-2Hz",
           "style": "成熟、松弛、照顾感强、语速稳定",
+          "sampleFile": "samples/anime-voices-20260523-101938/05-anime-warm-senior-sister.mp3",
           "useCases": [
             "陪伴型旁白",
             "情绪安抚",
@@ -95,10 +150,11 @@
           "id": "anime_youth_qingyin",
           "displayName": "青音少年",
           "recommendedVoice": "zh-CN-YunxiNeural",
-          "profile": "sunshine",
+          "profile": "06-anime-youth-qingyin",
           "rate": "+5%",
           "pitch": "+2Hz",
           "style": "清爽、少年感、轻快、没有厚重压迫感",
+          "sampleFile": "samples/anime-voices-20260523-101938/06-anime-youth-qingyin.mp3",
           "useCases": [
             "青春角色",
             "校园旁白",
@@ -110,10 +166,11 @@
           "id": "anime_clean_young_male",
           "displayName": "清爽青年男声",
           "recommendedVoice": "zh-CN-YunxiNeural",
-          "profile": "narrator",
+          "profile": "07-anime-clean-young-male",
           "rate": "+1%",
           "pitch": "+0Hz",
           "style": "年轻、干净、松弛、适合讲解",
+          "sampleFile": "samples/anime-voices-20260523-101938/07-anime-clean-young-male.mp3",
           "useCases": [
             "产品讲解",
             "轻知识视频",

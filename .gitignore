@@ -1,5 +1,7 @@
 .venv/
 out/
+voice-project-settings.json
+.codex-voice.json
 __pycache__/
 .pytest_cache/
 .DS_Store

@@ -14,13 +14,13 @@ The default voice profile is `02-anime-soft-loli-character`: `zh-CN-XiaoyiNeural
 
 Available modes are defined in `voice-interaction-modes.json`:
 
-- `chatty_companion` / 话牢模式: more process narration and stronger companionship.
+- `chatty_companion` / 话痨模式: more process narration and stronger companionship.
 - `steady_secretary` / 稳重秘书模式: balanced status updates at necessary work milestones.
 - `reserved_partner` / 收敛爱人模式: the default, quiet and high-signal.
 - `silent_executor` / 静默执行模式: minimal speech except required confirmations and final summaries.
 - `teaching_narrator` / 教学讲解模式: explains key reasoning and tradeoffs during complex work.
 
-Users can switch modes by saying “切到话牢模式”, “切到稳重秘书模式”, “切到收敛爱人模式”, “切到静默执行模式”, or “切到教学讲解模式”.
+Users can switch modes by saying “切到话痨模式”, “切到稳重秘书模式”, “切到收敛爱人模式”, “切到静默执行模式”, or “切到教学讲解模式”.
 
 Mandatory speech moments are the same in every mode: permission/approval requests, Plan-mode current choices, key unresolved tradeoffs, blocked requests for help, and final written replies.
 
@@ -45,14 +45,55 @@ For a project that should stay silent, add a project-root `voice-project-setting
 
 The helper scripts also check the current working directory, or a `-ProjectRoot` / `--project-root` argument, for `voice-project-settings.json` or `.codex-voice.json`. If the file contains `suppressAllSpeech: true`, `strategy: "voice_disabled"`, or `modeOverride: "voice_disabled"`, the script exits without generating or playing audio. Use `-IgnoreProjectVoiceSettings` / `--ignore-project-voice-settings` only for intentional testing.
 
-If no explicit `-Profile` / `--profile` is passed, the neural helpers also resolve project voices from `voiceOverride` or the selected `strategy`. This lets different projects use different default voices so the user can identify the active project by sound.
+If no explicit `-Profile` / `--profile` is passed, the neural helpers also resolve project voices from `voiceOverride` or the selected `strategy`. If the project settings include `voiceLocale`, the helpers use a matching edge-tts voice for English, French, Japanese, or Korean without adding extra bundled sample files. This lets different projects use different default voices and languages so the user can identify the active project by sound.
 
 Suggested project voice identities:
 
-- `project-voice-lab-cute`: voice sample lab / playful character sound.
+- `project-voice-lab-cute`: lively chatty character sound.
 - `project-coding-professional`: coding project / steady male voice.
 - `project-product-warm`: product design project / warm female voice.
 - `project-learning-narrator`: learning project / relaxed narration.
+
+Project voice modes are the user-facing preset layer for the configuration UI. The stored field is still `projectTag` for backward compatibility, but the UI treats it as a complete mode: it maps a project type to the underlying strategy, mode override, default voice profile, identity label, and silence flag. Current modes are:
+
+- `default_reserved`: light companion behavior with low-frequency speech.
+- `voice_lab_cute`: lively chatty behavior; shown as “活泼小话痨” in the UI.
+- `coding_quiet`: quiet execution behavior with a steady male voice.
+- `product_warm`: milestone reporting behavior with a warm female voice.
+- `learning_narrator`: teaching/explainer behavior with relaxed narration.
+- `silent_project`: project-level no-voice behavior.
+
+The helper scripts also understand these modes. If a project settings file contains `projectTag` but no explicit `voiceOverride`, the neural helper resolves the default voice from the mode. `silent_project` suppresses playback even if the rest of the file is minimal.
+
+## Configuration UI
+
+The repository includes a local web UI for project voice settings. It scans a Codex workspace, shows projects with existing settings, and writes the selected project tag, strategy, mode override, voice profile, identity label, voice locale, and silence flag back to the selected project.
+
+The UI has a language selector for Simplified Chinese, English, French, Japanese, and Korean. Localization changes the displayed labels, helper text, messages, mode cards, details table, preview language, generated custom-voice locale, and stored `voiceLocale`; stored configuration keys remain stable.
+
+Project voice modes are displayed as clickable cards. Choosing a card updates the hidden strategy/mode fields and voice preview immediately; users do not choose strategy and mode override separately. For projects without a local settings file, the server can auto-assign a mode: it first checks configured keyword rules, then falls back to a stable hash of the project path so different projects tend to get different default voices. The UI's “自动写入配置” area lets users choose “给尚未配置的项目根据项目特性自动配置” for missing settings only, or “给所有项目按照项目特性自动配置” to rewrite every listed project with the current automatic rules.
+
+The default URL is stable: `http://127.0.0.1:47321/`. The server is local and does not survive a Codex app or machine restart unless the user starts it again or enables the UI's “固定地址” option. The user-facing promise is simple: after enabling it, the machine keeps the configuration page address fixed when Codex starts. The implementation registers a current-user local service entry and does not modify the Codex app itself.
+
+The voice selector has a preview button. The UI sends the current locale and a voice-personality slogan to the local server, which generates a temporary preview under `out/config-ui-previews/`. Preview length is adaptive: chatty, energetic, or teaching voices can say a little more, while steady or quiet voices stay shorter. The preview uses the selected UI language instead of replaying longer Chinese sample files; non-Chinese languages use one generated voice per locale rather than a prebuilt sample matrix.
+
+The UI can also generate a project-level `customVoice` draft from a user-provided name and preference prompt. This is not voice cloning or model training; it maps the prompt to an available edge-tts voice plus rate, pitch, label, style, and preview slogan. Generation is temporary: the named custom voice only appears in the Default Voice selector after the user clicks Save to Project. Unsaved preview drafts are cleaned up on ordinary config submission or page exit. When written to `voice-project-settings.json`, the Windows and macOS helpers prefer `customVoice.voice`, `customVoice.rate`, and `customVoice.pitch` over the normal profile resolution.
+
+Prompts that mention aged, elderly, weathered, hoarse, husky, or slow female voices map to a slower, lower-pitched female approximation. This remains constrained by available edge-tts voices; it does not create a true hoarse or elderly cloned voice.
+
+Windows:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\start-config-ui.ps1" -Open
+```
+
+macOS:
+
+```bash
+bash "./scripts/start-config-ui.sh" --open
+```
+
+The UI is served from `web/config-ui/`. The local server API is implemented by `scripts/start-config-ui.py`, so submitting the form writes real project settings instead of only generating a JSON snippet. By default it scans the parent directory of this repository as the workspace root. Pass `-WorkspaceRoot` on Windows or `--workspace-root` on macOS to point it at another Codex workspace.
 
 ## Concurrent conversations
 
@@ -89,7 +130,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File ".\say-neural.ps1" -Voice "z
 Profiles:
 
 - `soft_loli_character`: `zh-CN-XiaoyiNeural`, default cute game-character voice.
-- `project-voice-lab-cute`: `zh-CN-XiaoyiNeural`, voice-lab identity.
+- `project-voice-lab-cute`: `zh-CN-XiaoyiNeural`, lively chatty character identity.
 - `project-coding-professional`: `zh-CN-YunyangNeural`, coding-project identity.
 - `project-product-warm`: `zh-CN-XiaoxiaoNeural`, product-design identity.
 - `project-learning-narrator`: `zh-CN-YunxiNeural`, learning/narration identity.

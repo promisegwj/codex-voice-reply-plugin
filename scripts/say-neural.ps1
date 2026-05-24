@@ -2,7 +2,7 @@ param(
     [Parameter(Position = 0, ValueFromPipeline = $true)]
     [string[]] $Text,
 
-    [ValidateSet("soft_loli_character", "02-anime-soft-loli-character", "project-voice-lab-cute", "project-coding-professional", "project-product-warm", "project-learning-narrator", "warm", "lively", "sunshine", "professional", "passion", "bright", "podcast", "detective", "narrator")]
+    [ValidateSet("soft_loli_character", "02-anime-soft-loli-character", "A1-relaxed-female-explainer", "A3-v2-gentle-companion-lighter", "A3-v3", "A5-casual-female-voiceover", "01-anime-genki-heroine", "03-anime-sweet-idol", "04-anime-cool-senior-sister", "05-anime-warm-senior-sister", "06-anime-youth-qingyin", "07-anime-clean-young-male", "project-voice-lab-cute", "project-coding-professional", "project-product-warm", "project-learning-narrator", "warm", "lively", "sunshine", "professional", "passion", "bright", "podcast", "detective", "narrator")]
     [string] $Profile = "soft_loli_character",
 
     [string] $Voice,
@@ -79,9 +79,86 @@ function Test-VoiceSuppressedBySettings {
         $null -ne $Settings -and (
             $Settings.suppressAllSpeech -eq $true -or
             $Settings.strategy -eq "voice_disabled" -or
-            $Settings.modeOverride -eq "voice_disabled"
+            $Settings.modeOverride -eq "voice_disabled" -or
+            $Settings.projectTag -eq "silent_project"
         )
     )
+}
+
+function Get-CustomVoiceFromSettings {
+    param($Settings)
+
+    if ($null -eq $Settings -or $null -eq $Settings.customVoice) {
+        return $null
+    }
+
+    $custom = $Settings.customVoice
+    if ([string]::IsNullOrWhiteSpace([string] $custom.voice)) {
+        return $null
+    }
+
+    return @{
+        Voice = [string] $custom.voice
+        Rate = if ([string]::IsNullOrWhiteSpace([string] $custom.rate)) { "+0%" } else { [string] $custom.rate }
+        Pitch = if ([string]::IsNullOrWhiteSpace([string] $custom.pitch)) { "+0Hz" } else { [string] $custom.pitch }
+    }
+}
+
+function Normalize-VoiceLocale {
+    param([string] $Locale)
+
+    if ([string]::IsNullOrWhiteSpace($Locale)) {
+        return $null
+    }
+
+    $trimmed = $Locale.Trim()
+    if ($trimmed.StartsWith("zh", [System.StringComparison]::OrdinalIgnoreCase)) {
+        return "zh-CN"
+    }
+
+    $base = $trimmed.Split("-", 2)[0].ToLowerInvariant()
+    if (@("en", "fr", "ja", "ko") -contains $base) {
+        return $base
+    }
+
+    return $null
+}
+
+function Get-VoiceLocaleFromSettings {
+    param($Settings)
+
+    if ($null -eq $Settings) {
+        return $null
+    }
+
+    if ($null -ne $Settings.customVoice -and -not [string]::IsNullOrWhiteSpace([string] $Settings.customVoice.locale)) {
+        return Normalize-VoiceLocale -Locale ([string] $Settings.customVoice.locale)
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace([string] $Settings.voiceLocale)) {
+        return Normalize-VoiceLocale -Locale ([string] $Settings.voiceLocale)
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace([string] $Settings.locale)) {
+        return Normalize-VoiceLocale -Locale ([string] $Settings.locale)
+    }
+
+    return $null
+}
+
+function Resolve-LocalizedVoiceName {
+    param(
+        [string] $Voice,
+        [string] $Locale
+    )
+
+    switch (Normalize-VoiceLocale -Locale $Locale) {
+        "en" { return "en-US-JennyNeural" }
+        "fr" { return "fr-FR-DeniseNeural" }
+        "ja" { return "ja-JP-NanamiNeural" }
+        "ko" { return "ko-KR-SunHiNeural" }
+        default { return $Voice }
+    }
 }
 
 function Resolve-StrategyVoiceProfile {
@@ -126,7 +203,56 @@ function Resolve-StrategyVoiceProfile {
     return $null
 }
 
+function Resolve-ProjectTagVoiceProfile {
+    param([string] $ProjectTag)
+
+    if ([string]::IsNullOrWhiteSpace($ProjectTag)) {
+        return $null
+    }
+
+    $strategyRoot = if ((Split-Path -Leaf $PSScriptRoot) -eq "scripts") {
+        Split-Path -Parent $PSScriptRoot
+    }
+    else {
+        $PSScriptRoot
+    }
+    $strategyPath = Join-Path $strategyRoot "project-voice-strategies.json"
+    if (Test-Path -LiteralPath $strategyPath) {
+        try {
+            $strategyConfig = Get-Content -Raw -Encoding UTF8 -LiteralPath $strategyPath | ConvertFrom-Json
+            $tag = $strategyConfig.projectTags.$ProjectTag
+            if ($null -ne $tag) {
+                if (-not [string]::IsNullOrWhiteSpace($tag.voiceOverride)) {
+                    return [string] $tag.voiceOverride
+                }
+
+                if (-not [string]::IsNullOrWhiteSpace($tag.strategy)) {
+                    return Resolve-StrategyVoiceProfile -StrategyName ([string] $tag.strategy)
+                }
+            }
+        }
+        catch {
+            Write-Warning "Could not parse project voice tags at '$strategyPath'."
+        }
+    }
+
+    $fallbackProfiles = @{
+        default_reserved = "02-anime-soft-loli-character"
+        voice_lab_cute = "project-voice-lab-cute"
+        coding_quiet = "project-coding-professional"
+        product_warm = "project-product-warm"
+        learning_narrator = "project-learning-narrator"
+    }
+
+    if ($fallbackProfiles.ContainsKey($ProjectTag)) {
+        return $fallbackProfiles[$ProjectTag]
+    }
+
+    return $null
+}
+
 $projectSettings = if ($IgnoreProjectVoiceSettings) { $null } else { Get-VoiceProjectSettings -StartPath $ProjectRoot }
+$projectVoiceLocale = if ($IgnoreProjectVoiceSettings) { $null } else { Get-VoiceLocaleFromSettings -Settings $projectSettings }
 
 if (-not $IgnoreProjectVoiceSettings -and (Test-VoiceSuppressedBySettings -Settings $projectSettings)) {
     exit 0
@@ -298,6 +424,56 @@ $profiles = @{
         Rate = "+5%"
         Pitch = "+5Hz"
     }
+    "A1-relaxed-female-explainer" = @{
+        Voice = "zh-CN-XiaoxiaoNeural"
+        Rate = "-5%"
+        Pitch = "-1Hz"
+    }
+    "A3-v2-gentle-companion-lighter" = @{
+        Voice = "zh-CN-XiaoxiaoNeural"
+        Rate = "+5%"
+        Pitch = "+0Hz"
+    }
+    "A3-v3" = @{
+        Voice = "zh-CN-XiaoxiaoNeural"
+        Rate = "+7%"
+        Pitch = "-1Hz"
+    }
+    "A5-casual-female-voiceover" = @{
+        Voice = "zh-CN-XiaoxiaoNeural"
+        Rate = "+3%"
+        Pitch = "+1Hz"
+    }
+    "01-anime-genki-heroine" = @{
+        Voice = "zh-CN-XiaoyiNeural"
+        Rate = "+8%"
+        Pitch = "+3Hz"
+    }
+    "03-anime-sweet-idol" = @{
+        Voice = "zh-CN-XiaoxiaoNeural"
+        Rate = "+6%"
+        Pitch = "+2Hz"
+    }
+    "04-anime-cool-senior-sister" = @{
+        Voice = "zh-CN-XiaoxiaoNeural"
+        Rate = "-3%"
+        Pitch = "-3Hz"
+    }
+    "05-anime-warm-senior-sister" = @{
+        Voice = "zh-CN-XiaoxiaoNeural"
+        Rate = "-1%"
+        Pitch = "-2Hz"
+    }
+    "06-anime-youth-qingyin" = @{
+        Voice = "zh-CN-YunxiNeural"
+        Rate = "+5%"
+        Pitch = "+2Hz"
+    }
+    "07-anime-clean-young-male" = @{
+        Voice = "zh-CN-YunxiNeural"
+        Rate = "+1%"
+        Pitch = "+0Hz"
+    }
     "project-voice-lab-cute" = @{
         Voice = "zh-CN-XiaoyiNeural"
         Rate = "+5%"
@@ -366,9 +542,16 @@ $profiles = @{
 }
 
 $profileWasExplicit = $PSBoundParameters.ContainsKey("Profile")
-if (-not $profileWasExplicit -and $null -ne $projectSettings) {
+$customVoiceSettings = if (-not $profileWasExplicit -and $null -ne $projectSettings) { Get-CustomVoiceFromSettings -Settings $projectSettings } else { $null }
+if (-not $profileWasExplicit -and $null -ne $projectSettings -and $null -eq $customVoiceSettings) {
     if (-not [string]::IsNullOrWhiteSpace($projectSettings.voiceOverride)) {
         $Profile = [string] $projectSettings.voiceOverride
+    }
+    elseif (-not [string]::IsNullOrWhiteSpace($projectSettings.projectTag)) {
+        $resolvedVoiceProfile = Resolve-ProjectTagVoiceProfile -ProjectTag ([string] $projectSettings.projectTag)
+        if (-not [string]::IsNullOrWhiteSpace($resolvedVoiceProfile)) {
+            $Profile = $resolvedVoiceProfile
+        }
     }
     else {
         $resolvedVoiceProfile = Resolve-StrategyVoiceProfile -StrategyName ([string] $projectSettings.strategy)
@@ -378,13 +561,15 @@ if (-not $profileWasExplicit -and $null -ne $projectSettings) {
     }
 }
 
-if (-not $profiles.ContainsKey($Profile)) {
+if ($null -eq $customVoiceSettings -and -not $profiles.ContainsKey($Profile)) {
     Write-Error "Unknown voice profile '$Profile'."
     exit 2
 }
 
-$selected = $profiles[$Profile]
-$voiceName = if ([string]::IsNullOrWhiteSpace($Voice)) { $selected.Voice } else { $Voice }
+$selected = if ($null -ne $customVoiceSettings) { $customVoiceSettings } else { $profiles[$Profile] }
+$voiceName = if ([string]::IsNullOrWhiteSpace($Voice)) {
+    if ($null -ne $customVoiceSettings) { $selected.Voice } else { Resolve-LocalizedVoiceName -Voice $selected.Voice -Locale $projectVoiceLocale }
+} else { $Voice }
 $rateValue = if ([string]::IsNullOrWhiteSpace($Rate)) { $selected.Rate } else { $Rate }
 $pitchValue = if ([string]::IsNullOrWhiteSpace($Pitch)) { $selected.Pitch } else { $Pitch }
 

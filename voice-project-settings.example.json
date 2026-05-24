@@ -1,7 +1,10 @@
 {
+  "projectTag": "default_reserved",
   "strategy": "reserved_partner_default",
-  "modeOverride": null,
-  "voiceOverride": null,
-  "voiceIdentityLabel": null,
-  "notes": "将本文件内容作为项目根目录 voice-project-settings.json 或 .codex-voice.json 的参考；当前对话中用户明确指定的模式和声音仍然优先。可把 voiceOverride 设为 project-coding-professional、project-product-warm、project-learning-narrator 或 project-voice-lab-cute，用声音区分项目。"
+  "modeOverride": "reserved_partner",
+  "voiceOverride": "02-anime-soft-loli-character",
+  "voiceIdentityLabel": "默认可爱角色音",
+  "voiceLocale": "zh-CN",
+  "suppressAllSpeech": false,
+  "notes": "将本文件内容作为项目根目录 voice-project-settings.json 或 .codex-voice.json 的参考；projectTag 是配置网页里给用户选择的项目标签，voiceLocale 会跟随配置网页语言选择影响试听和后续播报用的语音语言。"
 }

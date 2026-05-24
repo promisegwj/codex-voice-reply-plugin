@@ -1,7 +1,7 @@
 {
   "name": "codex-voice-reply-plugin",
-  "version": "0.2.0",
-  "description": "Codex plugin and local helpers for Mandarin voice replies, project-specific voice strategies, and cross-platform TTS.",
+  "version": "0.3.0",
+  "description": "Codex plugin and local helpers for Mandarin voice replies, project-specific voice strategies, a local configuration UI, and cross-platform TTS.",
   "author": {
     "name": "promisegwj"
   },
@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "Codex Voice Reply",
     "shortDescription": "Speak Mandarin result summaries and route voice behavior by project.",
-    "longDescription": "Codex Voice Reply adds a voice-reply skill, local TTS helpers, project-specific reading strategies, voice identity profiles, silence rules, and Windows/macOS playback support. The default neural voice profile is 02-anime-soft-loli-character: zh-CN-XiaoyiNeural at rate +5% and pitch +5Hz.",
+    "longDescription": "Codex Voice Reply adds a voice-reply skill, local TTS helpers, project-specific reading strategies, voice identity profiles, silence rules, a local configuration UI, custom voice preference mapping, and Windows/macOS playback support. The default neural voice profile is 02-anime-soft-loli-character: zh-CN-XiaoyiNeural at rate +5% and pitch +5Hz.",
     "developerName": "promisegwj",
     "category": "Productivity",
     "capabilities": [],

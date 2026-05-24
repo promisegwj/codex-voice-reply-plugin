@@ -10,7 +10,7 @@ The default voice profile is `02-anime-soft-loli-character`: `zh-CN-XiaoyiNeural
 
 Mode details live in `voice-interaction-modes.json`. Users may switch modes by saying:
 
-- “切到话牢模式”
+- “切到话痨模式”
 - “切到稳重秘书模式”
 - “切到收敛爱人模式”
 - “切到静默执行模式”
@@ -35,11 +35,17 @@ Old conversations may still speak because they may have loaded previous instruct
 
 The helper scripts perform a project-settings guard before generating audio. They search from the current working directory, or a provided `-ProjectRoot` / `--project-root`, upward for `voice-project-settings.json` or `.codex-voice.json`; `suppressAllSpeech: true`, `strategy: "voice_disabled"`, or `modeOverride: "voice_disabled"` causes a silent exit.
 
-When no explicit profile is passed, neural helpers resolve the default voice from `voiceOverride` first, then from the selected project `strategy`. Use distinct project voice profiles when the user wants to recognize the active project by sound.
+When no explicit profile is passed, neural helpers resolve the default voice from `voiceOverride` first, then from the selected project `strategy`. If project settings include `voiceLocale`, helpers switch ordinary profile playback to the matching locale voice for English, French, Japanese, or Korean while keeping custom voices exact. Use distinct project voice profiles and locales when the user wants to recognize the active project by sound.
 
 ## Concurrent playback
 
 Voice scripts must avoid overlapping audio across simultaneous Codex conversations. The provided helpers use a temp-file playback lock named `codex-voice-playback.lock`; if another conversation is already speaking, the next one waits instead of playing over it. Generated audio names include milliseconds and process id to avoid output collisions.
+
+## Timeout and fallback safety
+
+Treat a shell/tool timeout as an unknown playback state, not as proof that neural speech failed. Use a command timeout of at least 120 seconds for normal final summaries, especially on Windows where generation plus playback can take longer than 30 seconds.
+
+For one assistant reply, make only one speech attempt. Do not call the Windows SAPI fallback and do not retry the same summary after a timeout, because the first command may still be generating or playing audio. Use the fallback only when the neural helper returns a clear non-timeout error quickly and there is no evidence that playback started.
 
 ## macOS support
 
@@ -99,7 +105,7 @@ Preferred neural voice:
 powershell -NoProfile -ExecutionPolicy Bypass -File ".\say-neural.ps1" -Voice "zh-CN-XiaoyiNeural" -Rate "+5%" -Pitch "+5Hz" -Text "这里放要播报的口语化总分总摘要。"
 ```
 
-Fallback Windows voice:
+Fallback Windows voice, only for clear non-timeout neural failures:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File ".\say.ps1" -Voice Huihui -Device Realtek -Text "这里放要播报的口语化总分总摘要。"
@@ -107,4 +113,4 @@ powershell -NoProfile -ExecutionPolicy Bypass -File ".\say.ps1" -Voice Huihui -D
 
 ## Short prompt for a new conversation
 
-请按我的语音交互规则工作：默认使用“收敛爱人”模式，默认声音采用 `02-anime-soft-loli-character`（`zh-CN-XiaoyiNeural`，语速 `+5%`，音高 `+5Hz`），克制但不断联。凡是请求我授权、允许、确认，或者在 Plan 模式里让我选择当前选项，都必须先调用仓库根目录下的 `say-neural.ps1` 播报，再发送文字或展示选项。Plan 模式必须一问一播一答一推进，不要一次性读完多个后续问题。长任务按阶段和 30 到 60 秒无更新的时间点简短播报。准备正式回复前，也要用“总分总”播报一个中文口语化结果摘要；如果神经网络语音失败，再调用仓库根目录下的 `say.ps1`。
+请按我的语音交互规则工作：默认使用“收敛爱人”模式，默认声音采用 `02-anime-soft-loli-character`（`zh-CN-XiaoyiNeural`，语速 `+5%`，音高 `+5Hz`），克制但不断联。凡是请求我授权、允许、确认，或者在 Plan 模式里让我选择当前选项，都必须先调用仓库根目录下的 `say-neural.ps1` 播报，再发送文字或展示选项。Plan 模式必须一问一播一答一推进，不要一次性读完多个后续问题。长任务按阶段和 30 到 60 秒无更新的时间点简短播报。准备正式回复前，也要用“总分总”播报一个中文口语化结果摘要；语音命令超时时不要 fallback 或重播同一内容，只有神经网络语音明确快速失败且不是超时时，才调用仓库根目录下的 `say.ps1`。
