@@ -28,3 +28,13 @@ This release turns Codex Voice Reply from a script-centered voice helper into a 
 - `v0.2.0` already exists as a tag on the previous `main` state, so this release is prepared as `v0.3.0`.
 - The configuration UI writes local project files only after explicit user action.
 - Custom voice generation maps preferences to available edge-tts voices and parameters; it does not train or clone a voice model.
+
+### Next Roadmap
+
+- Add a one-command health check for Python, edge-tts, players, permissions, project settings, silence rules, output paths, and network access.
+- Add schema validation and a `resolve-voice-strategy` helper so users can see exactly why a project will speak or stay silent.
+- Improve the configuration UI with import/export, diff, rollback, batch preview, project search, pinned projects, and clearer error states.
+- Add event-specific voice triggers for test pass/fail, waiting for user input, downloads, command timeouts, authorization, and unexpected failures.
+- Build voice sample comparison reports with listening lists, parameter tables, use-case notes, user ratings, and recommendations.
+- Strengthen cross-platform fallback playback for Linux and offline macOS scenarios.
+- Prepare release assets, privacy scans, demo material, and plugin marketplace packaging for broader GitHub discovery.
