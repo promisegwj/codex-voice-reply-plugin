@@ -8,9 +8,11 @@ import hashlib
 import json
 import mimetypes
 import os
+import re
 import subprocess
 import sys
 import time
+import tomllib
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -47,6 +49,11 @@ SKIP_DIRS = {
     "out",
     "samples",
 }
+CODEX_CONVERSATION_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def codex_config_path() -> Path:
+    return Path.home() / ".codex" / "config.toml"
 
 
 def public_host(host: str) -> str:
@@ -464,6 +471,8 @@ def summarize_project(
 def is_codex_project_dir(path: Path) -> bool:
     if not path.is_dir() or path.name in SKIP_DIRS:
         return False
+    if is_codex_conversation_workspace_dir(path):
+        return False
     return any(
         (path / marker).exists()
         for marker in (
@@ -474,6 +483,61 @@ def is_codex_project_dir(path: Path) -> bool:
             ".codex-plugin",
         )
     )
+
+
+def is_codex_conversation_workspace_dir(path: Path) -> bool:
+    """Return true for Codex's own dated conversation workspaces, not user projects."""
+    try:
+        resolved = path.resolve()
+    except OSError:
+        return False
+
+    parent = resolved.parent
+    if CODEX_CONVERSATION_DATE_RE.match(parent.name) is not None and resolved.name.lower() == "new-chat":
+        return True
+
+    documents_root = (Path.home() / "Documents" / "Codex").resolve()
+    try:
+        relative = resolved.relative_to(documents_root)
+    except ValueError:
+        return False
+
+    parts = relative.parts
+    return len(parts) >= 2 and CODEX_CONVERSATION_DATE_RE.match(parts[0]) is not None
+
+
+def codex_config_projects() -> list[Path]:
+    config_path = codex_config_path()
+    try:
+        config = tomllib.loads(config_path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return []
+    except (OSError, tomllib.TOMLDecodeError):
+        return []
+
+    projects = config.get("projects", {})
+    if not isinstance(projects, dict):
+        return []
+
+    paths: list[Path] = []
+    for raw_path in projects:
+        if not isinstance(raw_path, str) or not raw_path.strip():
+            continue
+        try:
+            project_path = Path(raw_path).expanduser().resolve()
+        except OSError:
+            continue
+        if project_path.exists() and project_path.is_dir() and not is_codex_conversation_workspace_dir(project_path):
+            paths.append(project_path)
+    return paths
+
+
+def is_codex_config_project(path: Path) -> bool:
+    try:
+        resolved = path.resolve()
+    except OSError:
+        return False
+    return any(resolved == project_path for project_path in codex_config_projects())
 
 
 def scan_projects(workspace_root: Path, strategies_config: dict[str, Any], modes_config: dict[str, Any]) -> list[dict[str, Any]]:
@@ -488,6 +552,9 @@ def scan_projects(workspace_root: Path, strategies_config: dict[str, Any], modes
 
     if is_codex_project_dir(REPO_ROOT):
         add(REPO_ROOT)
+
+    for project_path in codex_config_projects():
+        add(project_path)
 
     if workspace_root.exists():
         roots = [workspace_root]
@@ -646,7 +713,11 @@ class ConfigUiHandler(BaseHTTPRequestHandler):
             project_path = Path(str(payload.get("projectPath", ""))).expanduser().resolve()
             if not project_path.exists() or not project_path.is_dir():
                 raise ValueError("Project path does not exist or is not a directory.")
-            if not self.server.allow_outside_workspace and not is_relative_to(project_path, self.server.workspace_root):
+            if (
+                not self.server.allow_outside_workspace
+                and not is_relative_to(project_path, self.server.workspace_root)
+                and not is_codex_config_project(project_path)
+            ):
                 raise ValueError("Project path is outside the configured workspace root.")
 
             settings_file = str(payload.get("settingsFile") or SETTINGS_FILES[0])
